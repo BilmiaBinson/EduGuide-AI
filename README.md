@@ -1,137 +1,182 @@
-# EduGuide AI 🎓
+# 🎓 EduGuide AI — RAG-Powered Educational Chatbot
 
-A modern, responsive educational AI chatbot web interface built for a website-scraped RAG assistant grounded in W3Schools tutorial content.
+An AI-powered educational assistant that answers questions using content retrieved from W3Schools Python tutorials. EduGuide AI combines Retrieval-Augmented Generation (RAG) with a modern web interface to provide context-aware answers grounded in educational resources.
 
-## Features
+## ✨ Features
 
-- **Modern Educational Dashboard**: Clean, distraction-free light theme with rounded cards, subtle shadows, and typography tailored for learning.
-- **Sidebar Navigation**:
-  - EduGuide AI brand with RAG badge
-  - **New Chat** button
-  - Recent chat history saved locally
-  - Dedicated **Knowledge source: W3Schools** information card
-- **Main Chat & Suggested Prompts**:
-  - Welcoming hero: *"Learn anything, one question at a time."*
-  - 4 quick starter cards:
-    - *What is Python?*
-    - *Why is Python easy to learn?*
-    - *What can Python do?*
-    - *Explain Python indentation.*
-- **Distinct Student & AI Messages**:
-  - Student messages with user bubble and timestamp
-  - AI responses rendered with rich Markdown (tables, lists, code syntax, bold text)
-  - Copy response button
-  - **Referenced Sources**: Clickable source link pills with W3Schools badges opening directly in new tabs
-- **Clean Input Bar**: Multiline auto-expanding textarea, Enter to send, Shift+Enter for new line, Send button with loading spinner.
-- **Error & Offline Handling**: No fake answers. If the FastAPI backend is not running, shows a clear connection error with host details and troubleshooting hints, plus a **Retry** button.
-- **Fully Responsive**: Adapts seamlessly from mobile screens (with sliding drawer) to desktop displays.
+- **AI-Powered Q&A:** Ask questions about Python concepts and programming fundamentals.
+- **Retrieval-Augmented Generation (RAG):** Retrieves relevant educational text chunks before generating answers.
+- **Source-Grounded Responses:** Provides source links to relevant W3Schools documentation.
+- **Interactive Chat Interface:** Clean, responsive UI with message cards and chat controls.
+- **Recent Chats:** Displays recent conversations in the interface.
+- **Vector Search:** Uses ChromaDB to retrieve relevant content based on semantic similarity.
+- **FastAPI Backend:** Exposes an API for communication between the frontend and the RAG pipeline.
 
----
+> Note: Recent chats are currently displayed in the interface. Persistent storage across sessions should be verified separately.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **React 18**
-- **TypeScript**
-- **Vite**
-- **Tailwind CSS**
-- **Lucide Icons**
-- **React Markdown** & **Remark GFM**
+| Component | Technology |
+|---|---|
+| Frontend | React, TypeScript, Vite |
+| Backend | Python, FastAPI |
+| RAG | Retrieval-Augmented Generation |
+| Vector Database | ChromaDB |
+| Embeddings | Sentence Transformers |
+| Language Model | Groq API |
+| Knowledge Source | W3Schools Python tutorials |
 
----
+## 🏗️ System Architecture
 
-## Getting Started
+```text
+W3Schools Python Tutorials
+          |
+          v
+   Web Scraping
+          |
+          v
+   Text Chunking
+          |
+          v
+ Sentence Embeddings
+          |
+          v
+      ChromaDB
+          |
+          | Relevant context
+          v
+User Question --> React Frontend
+                       |
+                       v
+                 FastAPI Backend
+                       |
+                       v
+                 RAG Retrieval
+                       |
+                       v
+                   Groq LLM
+                       |
+                       v
+              Answer + Source Links
+```
 
-### 1. Install Dependencies
+## ⚙️ How It Works
 
-Open your terminal in the project directory and run:
+1. **Content collection:** Educational content is extracted from W3Schools Python tutorials.
+2. **Text processing:** The extracted content is divided into smaller chunks.
+3. **Embedding generation:** Sentence Transformers converts chunks into vector embeddings.
+4. **Knowledge storage:** ChromaDB stores the embeddings and associated text.
+5. **Question processing:** The user submits a question through the chat interface.
+6. **Context retrieval:** The backend retrieves relevant educational chunks.
+7. **Answer generation:** The Groq-hosted language model generates a response using the retrieved context.
+8. **Source attribution:** Relevant source links are returned with the answer.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.9 or a compatible version
+- Node.js and npm
+- Git
+- A Groq API key
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/BilmiaBinson/EduGuide-AI.git
+cd EduGuide-AI
+```
+
+### 2. Set Up the Backend
+
+```bash
+cd backend
+python -m venv venv
+```
+
+Activate the environment on Windows:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create a `.env` file in the `backend` directory and configure the environment variables expected by your backend code, including your Groq API key.
+
+**Never commit API keys or `.env` files to GitHub.**
+
+### 3. Prepare the Knowledge Base
+
+If the project requires pre-scraped chunks, place the exported `w3schools_chunks.json` file in the expected location and run the chunk loader according to its usage instructions.
+
+```bash
+python load_chunks.py w3schools_chunks.json
+```
+
+Ensure the ChromaDB collection is populated before asking questions. If the database is not included in the repository, it must be initialized or rebuilt locally.
+
+### 4. Start the Backend
+
+From the `backend` directory:
+
+```bash
+python -m uvicorn main:app --host 127.0.0.1 --port 8001
+```
+
+The API will be available at:
+
+- API: http://127.0.0.1:8001
+- Interactive API documentation: http://127.0.0.1:8001/docs
+
+### 5. Start the Frontend
+
+Open a second terminal in the project root:
 
 ```bash
 npm install
-```
-
-### 2. Configure Environment
-
-Create or check your `.env` file (configured by default for standard FastAPI):
-
-```env
-VITE_API_BASE_URL=http://127.0.0.1:8001
-```
-
-### 3. Start Development Server
-
-Run the Vite development server:
-
-```bash
 npm run dev
 ```
 
-Then open your browser at `http://localhost:5173`.
+Open the local URL printed by Vite, usually:
 
----
+http://localhost:5173
 
-## FastAPI Backend Integration Guide
+## 📚 Knowledge Source
 
-EduGuide AI expects a Python FastAPI server running at `VITE_API_BASE_URL`.
+The current knowledge source is the W3Schools Python tutorial collection.
 
-### Expected API Endpoint
+- [W3Schools Python Tutorial](https://www.w3schools.com/python/)
 
-- **Method**: `POST`
-- **Path**: `/chat`
-- **Request Body**:
-  ```json
-  {
-    "question": "What is Python?"
-  }
-  ```
-- **Response Body**:
-  ```json
-  {
-    "answer": "Python is a popular programming language created by Guido van Rossum...",
-    "sources": [
-      "https://www.w3schools.com/python/python_intro.asp"
-    ]
-  }
-  ```
+Answers depend on the content available in the indexed knowledge base. Adding more educational webpages requires extracting, processing, and indexing their content.
 
-### Sample FastAPI Implementation (`main.py`)
+## 🔮 Future Enhancements
 
-```python
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Union
+- User authentication and individual chat histories.
+- Persistent storage of questions and answers.
+- Support for multiple subjects and educational websites.
+- Document uploads for PDF-based question answering.
+- Improved retrieval and answer evaluation.
+- Cloud deployment for public access.
+- Conversation management with saved and searchable sessions.
 
-app = FastAPI(title="EduGuide AI RAG Backend")
+## 🔐 Security
 
-# Enable CORS for Vite frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+- Keep API keys in environment variables.
+- Exclude `.env` files from version control.
+- Do not commit local database files or private credentials.
+- Review third-party website terms before scraping content.
 
-class ChatRequest(BaseModel):
-    question: str
+## 👩‍💻 Author
 
-class ChatResponse(BaseModel):
-    answer: str
-    sources: List[str]
+**Bilmia Binson**
 
-@app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(request: ChatRequest):
-    # Your W3Schools RAG retrieval & generation pipeline goes here:
-    # 1. Retrieve top matching chunks from scraped W3Schools vector DB
-    # 2. Feed context and question to LLM
-    # 3. Return answer and source URLs
-    return ChatResponse(
-        answer=f"Here is an explanation of '{request.question}' based on W3Schools...",
-        sources=["https://www.w3schools.com/python/python_intro.asp"]
-    )
-```
+GitHub: [@BilmiaBinson](https://github.com/BilmiaBinson)
 
-Run with:
-```bash
-uvicorn main:app --reload --port 8001
-```
+## 📄 License
+
+A license has not yet been specified. Add a `LICENSE` file if you intend to distribute the project under an open-source license.
